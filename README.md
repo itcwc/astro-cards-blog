@@ -8,6 +8,8 @@
 [![Astro](https://img.shields.io/badge/Astro-5-BC52EE?logo=astro&logoColor=white)](https://astro.build)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)]()
 
+**简体中文** | [English](README.en.md)
+
 </div>
 
 一个用 **Astro 5** 搭的极简博客模板：文章与笔记是仓库里的 Markdown 文件，构建产物是纯静态 HTML，可以直接丢给 Nginx、对象存储或任何静态托管平台。没有数据库、没有运行时服务、没有需要维护的后端。
