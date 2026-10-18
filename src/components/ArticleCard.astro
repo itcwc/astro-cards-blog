@@ -1,0 +1,27 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, readingTime } from '../lib/reading-time';
+
+interface Props {
+  entry: CollectionEntry<'articles'>;
+}
+const { entry } = Astro.props;
+const minutes = readingTime(entry.body ?? '');
+
+// 摘要：剥离常见 markdown 符号并压成单行，避免预览里出现 ```** 等原字符
+const raw = (entry.body ?? '')
+  .replace(/[#>*_`~]/g, '')
+  .replace(/\n+/g, ' ')
+  .trim();
+const excerpt = raw.length > 110 ? raw.slice(0, 110) + '…' : raw;
+---
+<div class="post-item" data-series={entry.data.series ?? ''}>
+  <a class="post-title" href={`/articles/${entry.id}`}>{entry.data.title}</a>
+  <p class="post-meta">
+    <span class="kind">文章</span>
+    <span>{formatDate(entry.data.date)} · {minutes} 分钟阅读</span>
+    {entry.data.category && <span class="tag">{entry.data.category}</span>}
+  </p>
+  <p class="post-excerpt">{excerpt}</p>
+  <a class="read-more" href={`/articles/${entry.id}`}>阅读全文 →</a>
+</div>

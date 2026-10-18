@@ -1,0 +1,89 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import NoteCard from '../../components/NoteCard.astro';
+import siteConfig from '../../lib/site';
+
+const notes = (await getCollection('notes', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const allTags = [...new Set(notes.flatMap((n) => n.data.tags))].sort();
+---
+<Layout title={`笔记 · ${siteConfig.siteName}`} description={`${siteConfig.siteName} 的笔记列表`}>
+  <section class="section">
+    <div class="section-head">
+      <h2>笔记</h2><span class="count">{notes.length}</span>
+    </div>
+    {allTags.length > 0 && (
+      <div class="filter-bar">
+        <button class="filter-chip active" data-tag="">全部</button>
+        {allTags.map((t) => (
+          <button class="filter-chip" data-tag={t}>{t}</button>
+        ))}
+      </div>
+    )}
+    <div class="note-list">
+      {notes.map((entry) => <NoteCard entry={entry} />)}
+    </div>
+    <div class="pager" id="note-pager"></div>
+  </section>
+  <script is:inline>
+    (function () {
+      var SIZE = 9;
+      var filterAttr = 'data-tag';
+      var list = document.querySelector('.note-list');
+      var items = Array.prototype.slice.call(document.querySelectorAll('.note-item'));
+      var pager = document.getElementById('note-pager');
+      var filterVal = '';
+      var page = 1;
+      function matchFn(it, val) {
+        var tags = (it.getAttribute('data-tags') || '').split(',');
+        return !val || tags.indexOf(val) !== -1;
+      }
+      function visible() { return items.filter(function (it) { return matchFn(it, filterVal); }); }
+      function renderPager(total) {
+        pager.innerHTML = '';
+        if (total <= 1) return;
+        var prev = document.createElement('button');
+        prev.textContent = '上一页';
+        prev.disabled = page === 1;
+        prev.addEventListener('click', function () { if (page > 1) { page--; render(); } });
+        pager.appendChild(prev);
+        for (var i = 1; i <= total; i++) {
+          (function (n) {
+            var b = document.createElement('button');
+            b.textContent = n;
+            if (n === page) b.className = 'active';
+            b.addEventListener('click', function () { page = n; render(); });
+            pager.appendChild(b);
+          })(i);
+        }
+        var next = document.createElement('button');
+        next.textContent = '下一页';
+        next.disabled = page === total;
+        next.addEventListener('click', function () { if (page < total) { page++; render(); } });
+        pager.appendChild(next);
+      }
+      function render() {
+        var vis = visible();
+        var total = Math.max(1, Math.ceil(vis.length / SIZE));
+        if (page > total) page = total;
+        items.forEach(function (it) { it.style.display = 'none'; });
+        var start = (page - 1) * SIZE;
+        vis.slice(start, start + SIZE).forEach(function (it) { it.style.display = ''; });
+        renderPager(total);
+      }
+      var btns = document.querySelectorAll('.filter-chip[' + filterAttr + ']');
+      btns.forEach(function (b) {
+        b.addEventListener('click', function () {
+          filterVal = b.getAttribute(filterAttr);
+          btns.forEach(function (x) { x.classList.remove('active'); });
+          b.classList.add('active');
+          page = 1;
+          render();
+        });
+      });
+      render();
+    })();
+  </script>
+</Layout>

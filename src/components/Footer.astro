@@ -1,0 +1,10 @@
+---
+import siteConfig from '../lib/site';
+const year = new Date().getFullYear();
+const note = siteConfig.footerText || siteConfig.tagline;
+---
+<footer class="site-footer">
+  {note && <p>{note}</p>}
+  <p class="copy">© {year} {siteConfig.siteName} · 用 Astro 构建</p>
+  {siteConfig.github && <p class="copy"><a href={siteConfig.github} target="_blank" rel="noopener">GitHub</a></p>}
+</footer>

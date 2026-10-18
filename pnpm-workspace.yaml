@@ -1,0 +1,5 @@
+# pnpm 11+ 统一配置位置（package.json 的 pnpm 字段已废弃，不再被读取）
+# 显式批准需要运行安装/构建脚本的依赖；pnpm 默认拦截全部依赖脚本
+allowBuilds:
+  esbuild: true
+  sharp: true

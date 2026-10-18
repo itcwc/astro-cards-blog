@@ -1,0 +1,205 @@
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --text: #1d1d1f;
+  --text-soft: #6b6b70;
+  --border: #e6e6e6;
+  --accent: #1d1d1f;
+  --code-bg: #f2f2f2;
+  --chip-bg: #f0eefb;
+  --chip-text: #534AB7;
+  --max: 720px;
+  --max-wide: 960px;
+  --radius: 14px;
+}
+[data-theme='dark'] {
+  --bg: #0e0e10;
+  --surface: #161618;
+  --text: #ececf1;
+  --text-soft: #9a9aa2;
+  --border: #262629;
+  --accent: #ececf1;
+  --code-bg: #1c1c1f;
+  --chip-bg: #2a2440;
+  --chip-text: #b9aef0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  line-height: 1.7; -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+
+/* Header */
+.site-header {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: var(--max-wide); margin: 0 auto; padding: 26px 20px;
+}
+.site-header .brand { font-weight: 700; font-size: 20px; letter-spacing: .5px; }
+.site-header nav { display: flex; gap: 22px; font-size: 15px; }
+.site-header nav a { color: var(--text-soft); transition: color .2s; }
+.site-header nav a:hover, .site-header nav a.active { color: var(--text); }
+
+/* Footer */
+.site-footer {
+  max-width: var(--max-wide); margin: 80px auto 40px; padding: 0 20px;
+  text-align: center; color: var(--text-soft); font-size: 14px;
+}
+
+/* Theme toggle */
+.theme-toggle {
+  background: none; border: none; cursor: pointer; color: var(--text-soft);
+  padding: 0; display: inline-flex; align-items: center; justify-content: center;
+}
+.theme-toggle:hover { color: var(--text); }
+.theme-toggle svg { width: 18px; height: 18px; }
+
+.theme-toggle .icon-moon { display: none; }
+[data-theme='dark'] .theme-toggle .icon-sun { display: none; }
+[data-theme='dark'] .theme-toggle .icon-moon { display: inline; }
+.site-footer .copy { margin-top: 6px; opacity: .7; }
+
+/* Hero */
+.hero { padding: 36px 0 24px; border-bottom: 1px solid var(--border); }
+.hero h1 { font-size: 44px; font-weight: 800; letter-spacing: -1.5px; }
+.hero p.tagline { color: var(--text-soft); margin-top: 12px; font-size: 15px; max-width: 560px; line-height: 1.9; }
+
+/* Section */
+.section { margin-top: 48px; }
+.section-head {
+  display: flex; align-items: baseline; gap: 8px;
+  border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 4px;
+}
+.section-head h2 { font-size: 17px; font-weight: 700; }
+.section-head .count { color: var(--text-soft); font-size: 13px; font-weight: 400; }
+.section-head a.more { margin-left: auto; font-size: 13px; color: var(--text-soft); }
+.section-head a.more:hover { color: var(--text); }
+
+/* List */
+.post-list, .note-list, .feed-list { margin-top: 4px; }
+.post-item, .note-item { padding: 22px 0; border-bottom: 1px solid var(--border); }
+
+.post-title { display: block; font-size: 18px; font-weight: 700; line-height: 1.45; }
+.post-title:hover { text-decoration: underline; text-underline-offset: 3px; }
+.post-meta {
+  color: var(--text-soft); font-size: 13px; margin-top: 8px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.tag {
+  font-size: 11px; padding: 2px 9px; border-radius: 20px;
+  background: var(--chip-bg); color: var(--chip-text); font-weight: 600;
+}
+.post-excerpt { color: var(--text-soft); font-size: 14px; margin-top: 10px; line-height: 1.75; }
+.read-more {
+  display: inline-block; margin-top: 10px; font-size: 13px; color: var(--text);
+  border-bottom: 1px solid var(--text-soft); padding-bottom: 1px;
+}
+.read-more:hover { border-color: var(--text); }
+
+/* Note item (rendered markdown, clickable) */
+.note-item { display: block; }
+.note-item:hover .note-text { color: var(--text); }
+.note-text { font-size: 15px; line-height: 1.85; color: var(--text); }
+.note-text > :first-child { margin-top: 0; }
+.note-text > :last-child { margin-bottom: 0; }
+.note-text p { margin: 0 0 10px; }
+.note-text ul, .note-text ol { margin: 0 0 10px 22px; }
+.note-text li { margin: 4px 0; }
+.note-text strong { font-weight: 600; }
+.note-item .post-meta { margin-top: 12px; }
+
+/* Mixed feed type label */
+.kind { font-size: 11px; letter-spacing: .5px; color: var(--text-soft); }
+
+/* Note gallery (九宫格, max 9) */
+.note-gallery {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+  margin-top: 14px; max-width: 460px;
+}
+.note-gallery img {
+  width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 8px;
+  cursor: pointer; display: block; background: var(--code-bg);
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed; inset: 0; background: rgba(0,0,0,.88);
+  display: none; align-items: center; justify-content: center;
+  z-index: 100; cursor: zoom-out; padding: 24px;
+}
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+
+/* Article prose (detail) */
+.prose { margin-top: 24px; }
+.prose h1, .prose h2, .prose h3 { margin: 28px 0 12px; line-height: 1.3; }
+.prose h2 { font-size: 22px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.prose h3 { font-size: 18px; }
+.prose p { margin: 14px 0; }
+.prose ul, .prose ol { margin: 14px 0 14px 22px; }
+.prose li { margin: 6px 0; }
+.prose a { color: #2b6cb0; text-decoration: underline; }
+.prose code {
+  background: var(--code-bg); padding: 2px 6px; border-radius: 5px;
+  font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;
+}
+.prose pre {
+  background: var(--code-bg); padding: 16px; border-radius: var(--radius);
+  overflow-x: auto; margin: 16px 0; border: 1px solid var(--border);
+}
+.prose pre code { background: none; padding: 0; }
+.prose blockquote {
+  border-left: 3px solid var(--text); padding: 4px 16px; color: var(--text-soft);
+  margin: 16px 0;
+}
+.prose img { max-width: 100%; border-radius: var(--radius); margin: 16px 0; }
+.prose hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* Article detail header */
+.article-header { margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 18px; }
+.article-header h1 { font-size: 30px; font-weight: 800; line-height: 1.3; letter-spacing: -.5px; margin-top: 10px; }
+.article-header .card-meta { margin-top: 12px; display: flex; align-items: center; gap: 10px; }
+
+/* Article series chip */
+.chip {
+  font-size: 11px; padding: 2px 9px; border-radius: 20px;
+  background: var(--chip-bg); color: var(--chip-text); font-weight: 600;
+  display: inline-block;
+}
+a.chip { transition: opacity .15s; }
+a.chip:hover { opacity: .75; }
+
+/* 筛选条（文章专栏 / 笔记标签 统一）— 方形长条标签样式 */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }
+.filter-chip {
+  font-size: 13px; padding: 7px 14px; border-radius: 6px; line-height: 1;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-soft); cursor: pointer; transition: all .15s;
+}
+.filter-chip:hover { color: var(--text); border-color: var(--accent); }
+.filter-chip.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+/* Pager (列表分页) */
+.pager { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 28px 0 4px; }
+.pager button {
+  font-size: 13px; min-width: 36px; padding: 7px 12px; line-height: 1;
+  border-radius: 6px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-soft); cursor: pointer; transition: all .15s;
+}
+.pager button:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+.pager button.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.pager button:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Header logo / github */
+.brand-logo { height: 24px; width: auto; display: block; }
+.brand-github { color: var(--text-soft); display: inline-flex; align-items: center; transition: color .2s; }
+.brand-github:hover { color: var(--text); }
+
+/* Note item: 文本区可点击 */
+.note-link { display: block; color: inherit; }
+.note-item:hover .note-text { color: var(--text); }

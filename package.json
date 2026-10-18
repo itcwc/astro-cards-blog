@@ -1,0 +1,27 @@
+{
+  "name": "astro-cards-blog",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "卡片流极简静态博客模板：Astro 5 + 内容即文件 + Decap CMS 后台，无数据库、无服务端。",
+  "keywords": [
+    "astro",
+    "blog",
+    "blog-template",
+    "static-site",
+    "markdown",
+    "decap-cms",
+    "cards"
+  ],
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.5.0",
+    "@astrojs/mdx": "^4.2.0"
+  }
+}

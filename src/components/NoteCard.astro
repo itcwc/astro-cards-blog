@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import { formatDate } from '../lib/reading-time';
+import NoteGallery from './NoteGallery.astro';
+
+interface Props {
+  entry: CollectionEntry<'notes'>;
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<div class="note-item" data-tags={entry.data.tags.join(',')}>
+  <a class="note-link" href={`/notes/${entry.id}`}>
+    <div class="note-text"><Content /></div>
+    <NoteGallery images={entry.data.images} />
+  </a>
+  <p class="post-meta">
+    <span class="kind">笔记</span>
+    {entry.data.title ? entry.data.title + ' · ' : ''}{formatDate(entry.data.date)}
+    {entry.data.tags.map((t) => <span class="tag">{t}</span>)}
+  </p>
+</div>

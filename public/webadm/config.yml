@@ -1,0 +1,144 @@
+# ============================================================
+# Decap CMS 配置（GitHub 后端 + 自建 OAuth 客户端）
+# 后台访问地址：<你的域名>/webadm/
+#
+# ⚠️ 重要前提（2026-10 实测）：
+#   GitHub 目前【不支持浏览器端 SPA 的 PKCE 授权】（Sveltia 官方文档：GitHub 已搁置该计划），
+#   因此 Decap 的 github 后端【无法直连 github.com 授权】，必须经由一个 OAuth 客户端（代理）。
+#   `auth_type: pkce` 只对 `name: git-gateway` 有效，对 github 后端无效，不要加。
+#
+#   推荐做法：在 Cloudflare Workers 部署开源 OAuth 客户端
+#     https://github.com/sveltia/sveltia-cms-auth
+#   （单文件、零依赖、官方声明兼容 Decap CMS），站点本身可继续由任意服务器托管，
+#   Worker 只负责授权这一件事。
+#
+# 需要替换的 4 处：backend.repo / backend.base_url / backend.site_domain / logo_url
+# ============================================================
+
+# 后台界面语言（Decap 内置简体中文；注意代码是 zh_Hans 下划线，不是 zh-Hans）
+locale: "zh_Hans"
+
+# 登录（授权）页与后台顶部使用的 logo —— 换成你自己的图标，替代默认的 Decap logo。
+# 用根绝对路径，本地与线上都能解析。
+logo_url: /favicon.svg
+
+backend:
+  name: github
+  # ↓↓↓ 换成你的仓库（owner/repo） ↓↓↓
+  repo: your-name/your-repo
+  # ↓↓↓ 换成你的默认分支 ↓↓↓
+  branch: main
+  # ── 授权：指向你部署的 OAuth 客户端 Worker ──
+  # ↓↓↓ 换成你的 Worker 地址（它的 /auth 与 /callback 两个路由） ↓↓↓
+  base_url: https://your-auth-worker.workers.dev
+  # 【不要】设 auth_endpoint：默认值 "auth" 正好对应 Worker 的 /auth 路由。
+  # 【不要】把 base_url 写成 https://github.com：那会把 Decap 的代理协议参数
+  #   （provider / site_id）发给 GitHub 的 /login/oauth/authorize —— 它只认
+  #   client_id，结果是 404。这个坑很隐蔽，别踩。
+  #
+  # Worker 侧配套（Cloudflare 面板 → Workers → 你的 Worker → Settings → Variables）：
+  #   Secret：GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET（GitHub OAuth App 的 ID 与 Secret）
+  #   明文：  ALLOWED_DOMAINS = your-domain.com,localhost,demo.decapcms.org
+  #           （匹配的是本文件 site_domain 传过去的 site_id；本地开发时 Decap 会把
+  #             site_id 固定成 demo.decapcms.org，所以也要放行）
+  # GitHub OAuth App 的 Authorization callback URL 必须填：
+  #   https://your-auth-worker.workers.dev/callback
+  auth_scope: repo
+  # 传给 Worker 的 site_id；设了它，本地调试也会用同一个值而不是 localhost
+  site_domain: your-domain.com
+
+# 媒体文件：在 markdown 正文中插入图片时上传到此目录，引用路径为 /uploads/xxx
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+# 保存即直接 commit 到 branch，触发宝塔 WebHook → 自动拉取构建上线
+publish_mode: simple
+
+# ---------------- 集合定义 ----------------
+collections:
+  # 文章：长教程 / 技术文
+  - name: "articles"
+    label: "文章"
+    label_singular: "文章"
+    folder: "src/content/articles"
+    slug: "{{slug}}"
+    create: true
+    fields:
+      - { name: title, label: "标题", widget: string }
+      - { name: date, label: "日期", widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
+      - { name: description, label: "摘要", widget: string, required: false }
+      - name: category
+        label: "分类"
+        widget: select
+        required: false
+        hint: "下拉选择已有分类；要新增分类，请在 config.yml 的 category → options 里加一项"
+        options:
+          - 技术
+          - 建站
+          - 运维
+          - 随笔
+          - 阅读
+      - name: series
+        label: "专栏"
+        widget: select
+        required: false
+        hint: "下拉选择已有专栏；要新增专栏，请在 config.yml 的 series → options 里加一项"
+        options:
+          - 快速上手
+          - Astro 入门
+          - 建站手记
+      - { name: draft, label: "草稿（不发布）", widget: boolean, default: false }
+      - { name: body, label: "正文", widget: markdown }
+
+  # 笔记：短知识卡 / 摘记（文件名带日期前缀，沿用现有约定）
+  - name: "notes"
+    label: "笔记"
+    label_singular: "笔记"
+    folder: "src/content/notes"
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    create: true
+    fields:
+      - { name: date, label: "日期", widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
+      - { name: title, label: "标题", widget: string, required: false }
+      - name: tags
+        label: "标签"
+        widget: list
+        required: false
+        hint: "点「添加 标签」后从下拉选择已有标签；要新增标签，请在 config.yml 的 tags → field → options 里加一项"
+        field:
+          name: item
+          label: 标签
+          widget: select
+          options:
+            - 设计
+            - Astro
+            - 技巧
+            - 前端
+            - 性能
+            - Git
+            - 自动化
+            - 阅读
+            - 随笔
+      - name: images
+        label: "图片（直接上传，存到 /uploads）"
+        widget: list
+        required: false
+        field: { name: item, widget: image }
+      - { name: draft, label: "草稿（不发布）", widget: boolean, default: false }
+      - { name: body, label: "正文", widget: markdown }
+
+  # 站点设置（替代原自定义「设置」抽屉，直接改写 src/site-config.json）
+  # ⚠️ Decap 的「文件集合」必须用复数 files: 数组，每个元素带 file: + fields:
+  - name: "site-config"
+    label: "站点设置"
+    files:
+      - name: site-config
+        label: "站点设置"
+        file: "src/site-config.json"
+        fields:
+          - { name: siteName, label: "站点名称", widget: string }
+          - { name: tagline, label: "标语", widget: text }
+          - { name: logo, label: "Logo（点击上传）", widget: image, required: false }
+          - { name: icon, label: "图标（点击上传）", widget: image, required: false }
+          - { name: github, label: "GitHub 地址", widget: string, required: false }
+          - { name: footerText, label: "页脚文字", widget: text, required: false }

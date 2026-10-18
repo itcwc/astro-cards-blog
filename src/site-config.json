@@ -1,0 +1,8 @@
+{
+  "siteName": "Cards Blog",
+  "tagline": "卡片流 · 静态优先 · 内容即文件",
+  "logo": "",
+  "icon": "/favicon.svg",
+  "github": "https://github.com/itcwc/astro-cards-blog",
+  "footerText": ""
+}

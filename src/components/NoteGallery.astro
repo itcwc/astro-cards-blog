@@ -1,0 +1,12 @@
+---
+interface Props {
+  images?: string[];
+}
+const { images = [] } = Astro.props;
+const items = (images ?? []).slice(0, 9);
+---
+{items.length > 0 && (
+  <div class="note-gallery">
+    {items.map((src) => <img src={src} alt="" loading="lazy" />)}
+  </div>
+)}

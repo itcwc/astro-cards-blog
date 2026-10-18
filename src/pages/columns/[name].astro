@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft && data.series);
+  const series = [...new Set(articles.map((a) => a.data.series))];
+  return series.map((s) => ({
+    params: { name: s },
+    props: {
+      series: s,
+      entries: articles
+        .filter((a) => a.data.series === s)
+        .sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
+    },
+  }));
+}
+const { series, entries } = Astro.props;
+---
+<Layout title={`${series} · 专栏`} description={`专栏「${series}」下的系列文章`}>
+  <section class="section">
+    <div class="section-head">
+      <h2>专栏 · {series}</h2><span class="count">{entries.length} 篇</span>
+    </div>
+    <div class="post-list">
+      {entries.map((entry) => <ArticleCard entry={entry} />)}
+    </div>
+  </section>
+</Layout>

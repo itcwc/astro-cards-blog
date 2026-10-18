@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>内容管理</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    /* 登录页换用站点自己的 logo（config.yml 的 logo_url）后，Decap 源码会在页面底部
+       额外渲染一个 Decap 品牌 credit 图标。这里用 :has() 精确定位「含自定义 logo 的
+       登录页 section」并隐藏其直接 svg 子元素，不影响 CMS 内部其它图标。 */
+    section:has(> span > img[alt="Logo"]) > svg { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- Decap CMS 加载入口；config.yml 与本文件同目录，Decap 会自动读取 -->
+  <!-- ⚠️ 必须用确切版本号，不要用 ^ 范围：caret 解析出的版本不确定，且旧版会被浏览器
+       长期缓存，导致改了 config 却不生效（表现为登录跳转异常）。
+       锁定版本后，改版本号本身也会让浏览器重新拉取、绕开旧缓存。 -->
+  <script src="https://unpkg.com/decap-cms@3.17.1/dist/decap-cms.js"></script>
+
+  <!--
+    汉化补充：Decap 语言包(zh_Hans)未覆盖图片插入弹窗里编辑器组件自带的硬编码英文
+    （Alt Text / Title / Image 等）。以下脚本在 Decap 容器内精确匹配这些文本/placeholder
+    并替换为中文，重复执行幂等、不改写用户输入值，仅做展示层替换。
+  -->
+  <script>
+  (function () {
+    var MAP = {
+      'choose an image': '选择图片',
+      'insert from url': '从 URL 插入',
+      'alt text': '替代文本',
+      'title': '标题',
+      'image': '图片'
+    };
+    function translate() {
+      var root = document.getElementById('root') || document.body;
+      if (!root) return;
+      // 1) 文本节点
+      var tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+      var n;
+      while ((n = tw.nextNode())) {
+        var t = n.nodeValue.trim().toLowerCase();
+        if (MAP[t] && n.nodeValue.trim() !== MAP[t]) {
+          n.nodeValue = MAP[t];
+        }
+      }
+      // 2) 输入框 placeholder（部分标签以 placeholder 形式出现）
+      var els = root.querySelectorAll('input[placeholder], textarea[placeholder]');
+      for (var i = 0; i < els.length; i++) {
+        var p = (els[i].getAttribute('placeholder') || '').trim().toLowerCase();
+        if (MAP[p]) els[i].setAttribute('placeholder', MAP[p]);
+      }
+    }
+    var timer;
+    var obs = new MutationObserver(function () {
+      clearTimeout(timer);
+      timer = setTimeout(translate, 50);
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+    translate();
+    // DOM 就绪后再补一轮（应对首屏渲染晚于脚本执行）
+    document.addEventListener('DOMContentLoaded', translate);
+    window.addEventListener('load', translate);
+  })();
+  </script>
+</body>
+</html>

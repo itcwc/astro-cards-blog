@@ -1,0 +1,75 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import NoteCard from '../components/NoteCard.astro';
+import siteConfig from '../lib/site';
+
+const articles = (await getCollection('articles', ({ data }) => !data.draft))
+  .map((e) => ({ type: 'article' as const, e, date: e.data.date.getTime() }));
+const notes = (await getCollection('notes', ({ data }) => !data.draft))
+  .map((e) => ({ type: 'note' as const, e, date: e.data.date.getTime() }));
+const feed = [...articles, ...notes].sort((a, b) => b.date - a.date);
+---
+<Layout>
+  <section class="hero">
+    <h1>{siteConfig.siteName}</h1>
+    {siteConfig.tagline && <p class="tagline">{siteConfig.tagline}</p>}
+  </section>
+
+  <section class="section">
+    <div class="feed-list">
+      {feed.map((item) =>
+        item.type === 'article'
+          ? <ArticleCard entry={item.e} />
+          : <NoteCard entry={item.e} />
+      )}
+    </div>
+    <div class="pager" id="home-pager"></div>
+  </section>
+</Layout>
+
+<script is:inline>
+  // 首页是文章 + 笔记的混排流：笔记偏短，密度比列表页高，所以每页 12 条
+  // （列表页是 9 条/页）。实现与 articles / notes 两个列表页保持一致，
+  // 纯客户端切页，不需要改路由；不足一页时不渲染分页条。
+  (function () {
+    var SIZE = 12;
+    var list = document.querySelector('.feed-list');
+    if (!list) return;
+    var items = Array.prototype.slice.call(list.children);
+    var pager = document.getElementById('home-pager');
+    var page = 1;
+    function renderPager(total) {
+      pager.innerHTML = '';
+      if (total <= 1) return;
+      var prev = document.createElement('button');
+      prev.textContent = '上一页';
+      prev.disabled = page === 1;
+      prev.addEventListener('click', function () { if (page > 1) { page--; render(); } });
+      pager.appendChild(prev);
+      for (var i = 1; i <= total; i++) {
+        (function (n) {
+          var b = document.createElement('button');
+          b.textContent = n;
+          if (n === page) b.className = 'active';
+          b.addEventListener('click', function () { page = n; render(); });
+          pager.appendChild(b);
+        })(i);
+      }
+      var next = document.createElement('button');
+      next.textContent = '下一页';
+      next.disabled = page === total;
+      next.addEventListener('click', function () { if (page < total) { page++; render(); } });
+      pager.appendChild(next);
+    }
+    function render() {
+      var total = Math.max(1, Math.ceil(items.length / SIZE));
+      if (page > total) page = total;
+      items.forEach(function (it) { it.style.display = 'none'; });
+      items.slice((page - 1) * SIZE, page * SIZE).forEach(function (it) { it.style.display = ''; });
+      renderPager(total);
+    }
+    render();
+  })();
+</script>
