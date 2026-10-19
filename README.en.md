@@ -37,6 +37,7 @@ An optional **Decap CMS admin panel** lives at `/webadm/` — sign in with GitHu
 - **Optional online admin** — Decap CMS with GitHub OAuth (self-hosted authorization endpoint on Cloudflare Workers); saving commits to the repo
 - **Theming and i18n scaffolding** — light/dark theme toggle, Simplified Chinese UI
 - **Mermaid diagrams** — a code block tagged with the `mermaid` language renders as a real diagram; loaded on demand (pages without diagrams pay nothing), colors follow the light/dark theme
+- **Table of contents** — long posts get an auto-generated outline (fixed sidebar beside the text on wide screens, collapsible at the top on narrow ones) that highlights the current section while scrolling; posts with fewer than 3 headings stay clean
 - **Built-in niceties** — reading time, date formatting, note galleries
 
 ## Quick start
