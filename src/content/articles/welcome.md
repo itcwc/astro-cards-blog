@@ -44,3 +44,14 @@ draft: false            # true 则不发布
 ## 用后台写
 
 访问 `/webadm/` 可以用 Decap CMS 在线编辑，保存即直接 commit 到仓库。首次使用需要配置 GitHub OAuth，详见 README 的「后台配置」一节。
+
+## 画流程图
+
+正文里写语言标记为 `mermaid` 的代码块，会渲染成真正的图。只有含图表的文章才会加载 mermaid，其余页面零开销：
+
+```mermaid
+flowchart LR
+    A[写 Markdown] --> B[git commit]
+    B --> C[构建]
+    C --> D[静态页面上线]
+```
