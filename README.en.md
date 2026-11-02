@@ -32,6 +32,7 @@ An optional **Decap CMS admin panel** lives at `/webadm/` — sign in with GitHu
 - **Type-safe content model** — Astro Content Collections with a zod schema, so a broken frontmatter fails at build time
 - **Cards-style layout** — posts and notes interleaved by date on the home page, magazine-style cards with category chips and a left accent bar for notes
 - **Filtering and pagination** — series/tag filters plus client-side pagination (9 per page on list pages, 12 on the home feed), all without a backend
+- **Site-wide search** — a JSON index is generated at build time and scored in the browser with zero dependencies; open it with `/` or `Ctrl/⌘+K`, matches are ranked by title, tag, excerpt and body, with All / Posts / Notes tabs and full keyboard control
 - **Series (column) pages** — the `series` field automatically archives entries to `/columns/<series-name>`
 - **Drafts** — anything with `draft: true` is filtered out at build time and never appears on the site
 - **Optional online admin** — Decap CMS with GitHub OAuth (self-hosted authorization endpoint on Cloudflare Workers); saving commits to the repo
@@ -104,6 +105,30 @@ Site name, tagline, GitHub link and friends live in **`src/site-config.json`**:
 
 Rebuild after editing. When you change the domain, also update `site` in `astro.config.mjs`.
 
+## Search
+
+The magnifier in the header (or `/`, or `Ctrl/⌘+K`) opens a site-wide search that covers the
+title, series/tags, excerpt and body of both posts and notes.
+
+No third-party service is involved: the index is generated at build time by
+[`src/pages/search.json.ts`](src/pages/search.json.ts) into `/search.json`, and
+[`public/search.js`](public/search.js) fetches it lazily on first open (~70KB, ~20KB gzipped) and
+ranks results locally. It works on any static host or object storage, and new content is indexed
+automatically on the next build. (Opening the HTML over `file://` won't work — browsers block
+`fetch` there.)
+
+- **Keys** — `/` or `Ctrl/⌘+K` to open, `ESC` to close, `↑↓` to move, `↵` to open
+- **Tabs** — All / Posts / Notes
+- **Empty state** — the six most recent entries are listed before you type
+- **Deep link** — append `?q=keyword` on any page, e.g. `/notes?q=astro`
+- **Highlight** — matches are marked in titles and body snippets, and snippets are cut around the first hit
+
+Ranking runs from "title starts with" → "title contains" → "series/tag" → "excerpt" → number of
+body occurrences. Multiple keywords are ANDed: an entry with no hit for any single term is dropped.
+
+To change what goes into the index (for example raising the body length cap), edit
+`src/pages/search.json.ts`; to change ranking, edit `score()` in `public/search.js`.
+
 ## Online admin (optional)
 
 The admin panel lives at **`/webadm/`**. It is powered by [Decap CMS](https://decapcms.org/): sign in with your GitHub account and it commits Markdown directly to the repository — no self-hosted backend service required.
@@ -139,6 +164,7 @@ See the comments at the top of the script for usage.
 ├── deploy.sh                 # self-hosted auto deploy script (optional)
 ├── public/
 │   ├── favicon.svg
+│   ├── search.js             # search front-end (index served from /search.json)
 │   ├── uploads/              # images uploaded from the admin panel
 │   └── webadm/               # Decap CMS entry point
 ├── src/
@@ -147,7 +173,7 @@ See the comments at the top of the script for usage.
 │   ├── content.config.ts     # content collection schema
 │   ├── layouts/
 │   ├── lib/                  # site config, reading time, ...
-│   ├── pages/                # routes: home / posts / notes / series
+│   ├── pages/                # routes: home / posts / notes / series / search index
 │   ├── site-config.json      # ← site name, tagline, GitHub link
 │   └── styles/global.css
 └── tsconfig.json

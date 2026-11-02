@@ -32,6 +32,7 @@
 - **类型安全的内容模型**：Astro Content Collections + zod schema，frontmatter 写错在构建期就报错
 - **卡片流版式**：首页文章/笔记按时间混排，杂志式卡片 + 分类 chip + 笔记左侧 accent 条
 - **列表页筛选与分页**：专栏/标签筛选 + 客户端分页（每页 9 条），首页混排每页 12 条，均无需后端
+- **站内搜索**：构建期生成 JSON 索引，前端零依赖打分；`/` 或 `Ctrl/⌘+K` 唤出，标题/标签/摘要/正文分级命中，支持「全部 / 文章 / 笔记」切换与纯键盘操作
 - **系列（专栏）页**：`series` 字段自动归档到 `/columns/<系列名>`
 - **草稿机制**：`draft: true` 的内容在构建期被过滤，不会出现在任何页面
 - **可选在线后台**：Decap CMS + GitHub OAuth（Cloudflare Workers 自建授权端点），保存即 commit
@@ -104,6 +105,27 @@ draft: false
 
 改完重新构建即可生效。需要改域名时，同时更新 `astro.config.mjs` 里的 `site`。
 
+## 站内搜索
+
+导航栏放大镜（或按 `/`、`Ctrl/⌘+K`）打开全站搜索，同时覆盖文章与笔记的标题、专栏/标签、摘要和正文。
+
+没有任何第三方服务参与：索引在构建期由 [`src/pages/search.json.ts`](src/pages/search.json.ts)
+生成到 `/search.json`，前端 [`public/search.js`](public/search.js) 首次打开搜索时才拉取（约 70KB，
+gzip 后 ~20KB），在本地打分排序。所以纯静态托管、对象存储等任何走 HTTP 的环境都能直接用，
+新增内容只要重新构建就会自动进入索引。（`file://` 直接双击打开 HTML 不行，浏览器会拦 `fetch`。）
+
+- **快捷键**：`/` 或 `Ctrl/⌘+K` 打开，`ESC` 关闭，`↑↓` 选择，`↵` 打开
+- **筛选**：全部 / 文章 / 笔记三个页签
+- **空态**：还没输入时列出最近 6 条，不是一片空白
+- **深链**：任意页面加 `?q=关键词` 会直接带查询打开，例如 `/notes?q=astro`
+- **高亮**：标题与正文片段中的命中词会标出来，片段截取到匹配位置前后
+
+打分权重从高到低依次是「标题开头 → 标题包含 → 专栏/标签 → 摘要 → 正文出现次数」，
+多个关键词之间是「与」关系（任一词没有任何命中就淘汰该条）。
+
+要调整索引内容（例如放大正文截断上限、补充新字段），改 `src/pages/search.json.ts`；
+要调整排序，改 `public/search.js` 里的 `score()`。
+
 ## 在线后台（可选）
 
 后台位于 **`/webadm/`**，基于 [Decap CMS](https://decapcms.org/)，用 GitHub 账号授权后直接把 Markdown 提交到仓库，无需任何自建后端服务。
@@ -138,6 +160,7 @@ draft: false
 ├── deploy.sh                 # 自托管自动部署脚本（可选）
 ├── public/
 │   ├── favicon.svg
+│   ├── search.js             # 站内搜索前端（索引由 /search.json 提供）
 │   ├── uploads/              # 后台上传的图片
 │   └── webadm/               # Decap CMS 后台入口
 ├── src/
@@ -146,7 +169,7 @@ draft: false
 │   ├── content.config.ts     # 内容集合 schema
 │   ├── layouts/
 │   ├── lib/                  # 站点配置、阅读时长等
-│   ├── pages/                # 路由：首页 / 文章 / 笔记 / 专栏
+│   ├── pages/                # 路由：首页 / 文章 / 笔记 / 专栏 / 搜索索引
 │   ├── site-config.json      # ← 站点名、标语、GitHub 链接
 │   └── styles/global.css
 └── tsconfig.json
