@@ -63,15 +63,22 @@ collections:
     folder: "src/content/articles"
     slug: "{{slug}}"
     create: true
+    sortable_fields:
+      - field: title
+      - field: date
+        label: "发布日期"
+        default_sort: desc
+      - field: commit_date
+        label: "最后更新"
     fields:
       - { name: title, label: "标题", widget: string }
       - { name: date, label: "日期", widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
       - { name: description, label: "摘要", widget: string, required: false }
       - name: category
         label: "分类"
-        widget: select
+        widget: smart-choice
         required: false
-        hint: "下拉选择已有分类；要新增分类，请在 config.yml 的 category → options 里加一项"
+        hint: "点选已有分类，或直接输入新分类后按回车 —— 不用改 config.yml"
         options:
           - 技术
           - 建站
@@ -80,9 +87,9 @@ collections:
           - 阅读
       - name: series
         label: "专栏"
-        widget: select
+        widget: smart-choice
         required: false
-        hint: "下拉选择已有专栏；要新增专栏，请在 config.yml 的 series → options 里加一项"
+        hint: "点选已有专栏，或直接输入新专栏后按回车 —— 不用改 config.yml"
         options:
           - 快速上手
           - Astro 入门
@@ -97,28 +104,32 @@ collections:
     folder: "src/content/notes"
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     create: true
+    sortable_fields:
+      - field: title
+      - field: date
+        label: "发布日期"
+        default_sort: desc
+      - field: commit_date
+        label: "最后更新"
     fields:
       - { name: date, label: "日期", widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
       - { name: title, label: "标题", widget: string, required: false }
       - name: tags
         label: "标签"
-        widget: list
+        widget: smart-choice
+        multiple: true
         required: false
-        hint: "点「添加 标签」后从下拉选择已有标签；要新增标签，请在 config.yml 的 tags → field → options 里加一项"
-        field:
-          name: item
-          label: 标签
-          widget: select
-          options:
-            - 设计
-            - Astro
-            - 技巧
-            - 前端
-            - 性能
-            - Git
-            - 自动化
-            - 阅读
-            - 随笔
+        hint: "点选已有标签，或输入新标签后按回车；可加多个，输入框为空时按 Backspace 删除上一个"
+        options:
+          - 设计
+          - Astro
+          - 技巧
+          - 前端
+          - 性能
+          - Git
+          - 自动化
+          - 阅读
+          - 随笔
       - name: images
         label: "图片（直接上传，存到 /uploads）"
         widget: list
